@@ -12,7 +12,6 @@ const init = (server) => {
   };
 
   const executeTransaction = (transaction, socket) => {
-    console.log(transaction.event)
     if (isValid(transaction, socket)) {
       activePeers.get(transaction.from).lastActive = new Date();
       io.to(transaction.to).emit(transaction.event, transaction);
