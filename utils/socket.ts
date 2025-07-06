@@ -12,9 +12,20 @@ import { validateTransaction } from "./validator";
 
 const init = (server: HttpServer): IOServer => {
     const manager = new Manager();
+    // Determine the CORS origin value understood by Socket.IO:
+    //   • "*" (string) → allow any origin
+    //   • string[]      → allow listed origins
+    //   • false         → disable CORS (handled elsewhere)
+    const corsOrigin =
+        ALLOWED_ORIGINS.length === 1 && ALLOWED_ORIGINS[0] === "*"
+            ? "*"
+            : ALLOWED_ORIGINS.length
+            ? ALLOWED_ORIGINS
+            : false;
+
     const io = new IOServer(server, {
         path: "/ws",
-        cors: { origin: ALLOWED_ORIGINS.length ? ALLOWED_ORIGINS : false },
+        cors: { origin: corsOrigin },
     });
 
     // Debounce room-state emissions
