@@ -13,6 +13,7 @@ import { validateTransaction } from "./validator";
 const init = (server: HttpServer): IOServer => {
     const manager = new Manager();
     const io = new IOServer(server, {
+        path: "/signal-service/ws",
         cors: { origin: ALLOWED_ORIGINS.length ? ALLOWED_ORIGINS : false },
     });
 
