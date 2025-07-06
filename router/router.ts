@@ -4,11 +4,15 @@ import activePeers from "../store/activePeers";
 import logger from "../utils/logger";
 import rateLimit from "express-rate-limit";
 import { registry } from "../utils/metrics";
+import requireApiKey from "../utils/auth";
 
 const router = express.Router();
 
 // Apply simple rate limiter to all API routes
 router.use(rateLimit({ windowMs: 60_000, max: 100 }));
+
+// Protect sensitive endpoints with API key middleware
+router.use(["/api/rooms", "/api/peers", "/metrics"], requireApiKey);
 
 // Log each request
 router.use((req: Request, res: Response, next) => {

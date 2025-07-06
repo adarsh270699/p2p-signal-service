@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  app:
+    # Build the Node/TypeScript signal-server image locally
+    build: .
+    container_name: p2p-signal
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - API_KEY=changeme_key
+      - ALLOWED_ORIGINS=*
+    read_only: true
+    tmpfs:
+      - /tmp:rw,size=64m
+    restart: unless-stopped
+    expose:
+      - "3000"
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks:
+      - signal-net
+
+  nginx:
+    image: nginx:1.26-alpine
+    container_name: signal-nginx
+    ports:
+      - "80:80"    # HTTP  (Let's Encrypt challenge / fallback)
+      - "443:443"  # HTTPS
+    volumes:
+      # Custom Nginx virtual-host configuration
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      # Let's Encrypt certificates (created on host or via separate companion container)
+      - ./certs:/etc/letsencrypt:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+    networks:
+      - signal-net
+
+networks:
+  signal-net:
+    driver: bridge 

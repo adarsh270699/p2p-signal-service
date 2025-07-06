@@ -75,7 +75,6 @@ const init = (server: HttpServer): IOServer => {
     const handlePeerLeft = (socketId: string, roomId: string): void => {
         io.to(roomId).emit("peer-left", { peerId: socketId });
         debouncedEmitRoomState(roomId);
-        peerGauge.dec();
         if (roomId && !rooms.has(roomId)) roomGauge.dec();
     };
 
@@ -92,7 +91,6 @@ const init = (server: HttpServer): IOServer => {
             socket.join(newRoomId);
             io.to(newRoomId).emit("peer-joined", { peerId: socket.id });
             debouncedEmitRoomState(newRoomId);
-            roomGauge.inc();
         }
     };
 
@@ -106,6 +104,7 @@ const init = (server: HttpServer): IOServer => {
             if (oldRoomId) {
                 handlePeerLeft(socket.id, oldRoomId);
             }
+            peerGauge.dec();
             logger.info({ msg: "peer disconnected", peerId: socket.id });
         });
 
@@ -114,6 +113,7 @@ const init = (server: HttpServer): IOServer => {
                 socket.id
             );
             handleRoomChange(socket, oldRoomId, newRoomId);
+            roomGauge.inc();
             socket.emit("room-created", { roomId: newRoomId });
         });
 
@@ -139,6 +139,7 @@ const init = (server: HttpServer): IOServer => {
                 if (oldRoomId) {
                     handlePeerLeft(socketId, oldRoomId);
                 }
+                peerGauge.dec();
             }
         }
     }, 60_000);

@@ -17,3 +17,6 @@ export const RATE_LIMIT_MAX_EVENTS =
     Number(process.env.RATE_LIMIT_MAX_EVENTS) || 50;
 export const MAX_PAYLOAD_BYTES =
     Number(process.env.MAX_PAYLOAD_BYTES) || 16 * 1024; // 16KB
+
+// Optional application-wide API key for protected routes
+export const API_KEY = process.env.API_KEY || "";
