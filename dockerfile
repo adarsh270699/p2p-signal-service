@@ -8,14 +8,18 @@ RUN --mount=type=cache,target=/root/.npm \
 # 2️⃣ copy sources and compile
 COPY . .
 RUN npm run build                # → dist/
+# 3️⃣ install production dependencies
+RUN npm ci --only=production --ignore-scripts
+
 # ---------- runtime stage ----------
 # Use a tiny, non-root Node base image
 FROM gcr.io/distroless/nodejs20-debian11 AS runtime
 WORKDIR /app
-# 3️⃣ copy production node_modules + compiled JS
+# 4️⃣ copy production node_modules + compiled JS
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package*.json ./
-# 4️⃣ set an unprivileged user already present in distroless images
+# 5️⃣ set an unprivileged user already present in distroless images
 USER nonroot
 EXPOSE 3000
 ENV NODE_ENV=production PORT=3000
